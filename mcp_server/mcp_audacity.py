@@ -13,6 +13,8 @@ logger = logging.getLogger("audacity-mcp")
 mcp = FastMCP("Audacity")
 
 from metrics import track_performance, metrics
+from security_utils import validate_command
+import time
 
 # Platform specific constants and logging paths
 if sys.platform == 'win32':
@@ -31,6 +33,8 @@ else:
 
 # Ensure log directory exists
 os.makedirs(LOG_DIR, exist_ok=True)
+if sys.platform != 'win32':
+    os.chmod(LOG_DIR, 0o700) # Restrict log directory access
 logging.basicConfig(
     level=logging.INFO,
     format='%(asctime)s [%(levelname)s] %(name)s: %(message)s',
@@ -43,10 +47,17 @@ logger = logging.getLogger("audacity-mcp")
 
 def _send_command(command: str) -> str:
     """Internal helper to send a command to Audacity and read response."""
+    if not validate_command(command):
+        logger.warning(f"Blocked invalid or unsafe command: {command}")
+        return "Error: Invalid or unsafe command. Command rejected by security policy."
+
     if not os.path.exists(WRITE_NAME) or not os.path.exists(READ_NAME):
         return "Error: Audacity pipes not found. Is Audacity running with mod-script-pipe enabled?"
 
     try:
+        # On Linux/Mac, ensure pipes have restrictive permissions if we create them
+        # (Audacity usually creates them, but we should verify if possible)
+        
         with open(WRITE_NAME, 'w') as to_pipe:
             logger.info(f"Sending command: {command}")
             to_pipe.write(command + EOL)
@@ -54,8 +65,17 @@ def _send_command(command: str) -> str:
 
         with open(READ_NAME, 'r') as from_pipe:
             response = ""
+            start_time = time.time()
+            timeout = 5.0 # 5 seconds timeout for pipe reading
+            
             while True:
+                if time.time() - start_time > timeout:
+                    logger.error("Timeout reading from Audacity pipe")
+                    return "Error: Timeout communicating with Audacity."
+                
                 line = from_pipe.readline()
+                if not line: # EOF
+                    break
                 if line == '\n' and len(response) > 0:
                     break
                 response += line

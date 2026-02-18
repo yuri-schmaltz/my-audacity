@@ -3,7 +3,15 @@ import logging
 from functools import wraps
 from typing import Dict, List
 
+import re
+
 logger = logging.getLogger("audacity-mcp.metrics")
+
+def redact_path(text: str) -> str:
+    """Redacts absolute paths in logs to prevent PII leakage."""
+    # Pattern to match Linux/Windows absolute paths
+    path_pattern = r'(/[a-zA-Z0-9\._\-]+)+|([A-Z]:\\[a-zA-Z0-9\._\- \\]+)'
+    return re.sub(path_pattern, "[REDACTED_PATH]", text)
 
 # Simple in-memory metrics store
 class Metrics:
@@ -51,5 +59,6 @@ def track_performance(f):
         finally:
             duration = time.perf_counter() - start_time
             metrics.add_call(duration, success)
-            logger.debug(f"Command {f.__name__} took {duration:.4f}s (success={success})")
+            safe_name = redact_path(f.__name__)
+            logger.debug(f"Command {safe_name} took {duration:.4f}s (success={success})")
     return wrapper
