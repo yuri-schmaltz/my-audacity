@@ -12,17 +12,34 @@ logger = logging.getLogger("audacity-mcp")
 # Initialize FastMCP server
 mcp = FastMCP("Audacity")
 
-# Platform specific constants
+from metrics import track_performance, metrics
+
+# Platform specific constants and logging paths
 if sys.platform == 'win32':
     WRITE_NAME = '\\\\.\\pipe\\ToSrvPipe'
     READ_NAME = '\\\\.\\pipe\\FromSrvPipe'
     EOL = '\r\n\0'
+    LOG_DIR = os.path.join(os.environ.get('LOCALAPPDATA', os.path.expanduser('~')), 'Audacity', 'Logs')
 else:
     # Linux or Mac
     PIPE_BASE = '/tmp/audacity_script_pipe.'
     WRITE_NAME = PIPE_BASE + 'to.' + str(os.getuid())
     READ_NAME = PIPE_BASE + 'from.' + str(os.getuid())
     EOL = '\n'
+    # Use XDG_CACHE_HOME or ~/.cache for logs according to framework
+    LOG_DIR = os.path.join(os.environ.get('XDG_CACHE_HOME', os.path.expanduser('~/.cache')), 'audacity-mcp')
+
+# Ensure log directory exists
+os.makedirs(LOG_DIR, exist_ok=True)
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s [%(levelname)s] %(name)s: %(message)s',
+    handlers=[
+        logging.StreamHandler(),
+        logging.FileHandler(os.path.join(LOG_DIR, "mcp-server.log"))
+    ]
+)
+logger = logging.getLogger("audacity-mcp")
 
 def _send_command(command: str) -> str:
     """Internal helper to send a command to Audacity and read response."""
@@ -48,6 +65,7 @@ def _send_command(command: str) -> str:
         return f"Error communicating with Audacity: {e}"
 
 @mcp.tool()
+@track_performance
 def audacity_command(command: str) -> str:
     """
     Send a raw scripting command to Audacity.
@@ -61,14 +79,38 @@ def audacity_command(command: str) -> str:
     return _send_command(command)
 
 @mcp.tool()
+@track_performance
 def get_track_info() -> str:
     """Get information about all tracks in the current project."""
     return _send_command("GetInfo: Type=Tracks")
 
 @mcp.tool()
+@track_performance
 def list_available_commands() -> str:
     """List all available scripting commands in Audacity."""
     return _send_command("Help: Command=Help")
+
+@mcp.tool()
+def health_check() -> dict:
+    """Check the health of the MCP server and its connection to Audacity."""
+    pipes_exist = os.path.exists(WRITE_NAME) and os.path.exists(READ_NAME)
+    audacity_alive = False
+    if pipes_exist:
+        response = _send_command("Help: Command=Help")
+        audacity_alive = "BatchCommand" in response # Simple check for a valid response
+
+    return {
+        "status": "ok" if audacity_alive else "degraded",
+        "pipes_found": pipes_exist,
+        "audacity_connected": audacity_alive,
+        "platform": sys.platform,
+        "log_directory": LOG_DIR
+    }
+
+@mcp.tool()
+def get_metrics() -> dict:
+    """Get performance metrics for the MCP server."""
+    return metrics.get_summary()
 
 if __name__ == "__main__":
     mcp.run()

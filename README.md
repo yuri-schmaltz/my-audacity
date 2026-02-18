@@ -12,4 +12,9 @@ You can stay updated with our efforts on [YouTube](https://youtube.com/@audacity
 
 ## License
 
+- **src/**: Main entry point and modern Audacity 4 UI framework.
+- **au3/**: Legacy Audacity 3 core engine and logic (currently being integrated).
+- **mcp_server/**: Metadata and automation utilities.
+
 Audacity is open source software licensed GPLv3. Most code files are GPLv2-or-later, with the notable exceptions being `/au3/lib-src` (which contains third party libraries), as well as VST3-related code. Documentation is licensed CC-by 3.0 unless otherwise noted. Details can be found in the [license file](LICENSE.txt).
+

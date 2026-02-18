@@ -12,3 +12,8 @@
 *.ttl text=auto
 *.aps text=auto
 *.trig text=auto
+
+# Mark third-party libraries as generated to hide them from GitHub stats
+au3/lib-src/** linguist-generated
+muse_framework/** linguist-generated
+

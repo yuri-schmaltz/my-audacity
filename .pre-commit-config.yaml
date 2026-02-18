@@ -1,0 +1,17 @@
+repos:
+- repo: https://github.com/pre-commit/pre-commit-hooks
+  rev: v5.0.0
+  hooks:
+    - id: check-added-large-files
+    - id: check-case-conflict
+    - id: check-merge-conflict
+    - id: check-yaml
+    - id: end-of-file-fixer
+    - id: trailing-whitespace
+- repo: local
+  hooks:
+    - id: check-venv
+      name: Check for virtual environments
+      entry: .venv/|venv/|mcp_server/.venv/
+      language: fail
+      files: ^.*$

@@ -273,3 +273,10 @@ CMakeUserPresets.json
 
 # QML language server
 **/.qmlls.ini
+
+# Python / MCP Server
+mcp_server/.venv/
+mcp_server/__pycache__/
+mcp_server/.pytest_cache/
+.venv/
+__pycache__/

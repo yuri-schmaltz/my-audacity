@@ -60,7 +60,8 @@ cmake --install build/          # install (every successful build)
 
 ### With Visual Studio (Windows only)
 
-Double-click the `generate_sln.bat` script in the root of the repository. This will generate a Visual Studio solution in the `build` directory and build the `install` target. Open the generated solution (./build/audacity.sln) in Visual Studio and press F5 to run Audacity.
+Use CMake to generate a Visual Studio solution in the `build` directory. Open the generated solution (./build/audacity.sln) in Visual Studio and press F5 to run Audacity.
+
 
 ### With VSCode (Windows only)
 
