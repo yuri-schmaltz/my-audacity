@@ -14,6 +14,7 @@
 #ifndef Q_OS_WASM
 #include <QThreadPool>
 #endif
+#include <algorithm>
 
 #include "modularity/ioc.h"
 #include "async/processevents.h"
@@ -254,7 +255,7 @@ std::vector<muse::modularity::IContextSetup*>& GuiApp::contextSetups(const muse:
     return ref.setups;
 }
 
-modularity::ContextPtr GuiApp::setupNewContext()
+modularity::ContextPtr GuiApp::setupNewContext(const muse::StringList& args)
 {
 #ifndef MUSE_MULTICONTEXT_WIP
     static bool once = false;
@@ -349,6 +350,17 @@ modularity::ContextPtr GuiApp::setupNewContext()
     });
 
     return ctx;
+}
+
+void GuiApp::destroyContext(const muse::modularity::ContextPtr& ctx)
+{
+    auto it = std::find_if(m_contexts.begin(), m_contexts.end(), [&](const Context& c) {
+        return c.ctx->id == ctx->id;
+    });
+    if (it != m_contexts.end()) {
+        qDeleteAll(it->setups);
+        m_contexts.erase(it);
+    }
 }
 
 int GuiApp::contextCount() const
