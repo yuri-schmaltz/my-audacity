@@ -30,7 +30,7 @@ def test_send_command_no_pipes(mock_exists):
     assert "Error: Audacity pipes not found" in result
 
 @mock.patch('os.path.exists')
-@mock.patch('builtins.open', side_exception=IOError("Pipe error"))
+@mock.patch('builtins.open', side_effect=IOError("Pipe error"))
 def test_send_command_io_error(mock_open, mock_exists):
     # Setup mocks
     mock_exists.return_value = True
