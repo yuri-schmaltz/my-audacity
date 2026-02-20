@@ -280,3 +280,4 @@ mcp_server/__pycache__/
 mcp_server/.pytest_cache/
 .venv/
 __pycache__/
+install/
