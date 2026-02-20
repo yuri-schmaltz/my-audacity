@@ -43,6 +43,8 @@ set(AU3_DEF
     # Note: WXBASE_RESTRICTIONS and WXPLATFORM_DEFS are defined in au3defs.cmake (included above)
     # and are reused here for AU3 source files compiled directly in au3wrap
     ${WXBASE_RESTRICTIONS} ${WXPLATFORM_DEFS}
+    -DBUILDING_SCRIPT_PIPE
+    -DAUDACITY_DLL_API=
 )
 
 # AU3 include directories for au3wrap module
@@ -61,6 +63,14 @@ set(AU3_INCLUDE
 
     # for modules like mod-mp3, mod-ffmpeg that are still compiled as sources
     ${IMPORT_EXPORT_MODULE}
+    ${AU3_MODULES}/scripting/mod-script-pipe
+    ${AUDACITY_ROOT}/src
+    ${AU3_LIBRARIES}/au3-utility
+    ${AU3_LIBRARIES}/au3-menus
+    ${AU3_LIBRARIES}/au3-project
+    ${AU3_LIBRARIES}/au3-wave-track
+    ${AU3_LIBRARIES}/au3-label-track
+    ${AU3_LIBRARIES}/au3-note-track
 )
 
 set(AU3_LINK

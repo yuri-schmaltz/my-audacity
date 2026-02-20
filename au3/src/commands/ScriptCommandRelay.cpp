@@ -41,19 +41,16 @@ static int ExecCommand(wxString* pIn, wxString* pOut, bool fromMain)
             ev.SetCommand(cmd);
 
             if (fromMain) {
-                // Use SafelyProcessEvent, which stops exceptions, because this is
-                // expected to be reached from within the XLisp runtime
-                wxTheApp->SafelyProcessEvent(ev);
+                // wxTheApp->SafelyProcessEvent(ev);
             } else {
-                // Send the event to the main thread
-                wxTheApp->AddPendingEvent(ev);
+                // wxTheApp->AddPendingEvent(ev);
             }
         }
 
         // Wait for and retrieve the response
         *pOut = builder.GetResponse();
     } else {
-        *pOut = wxString{}
+        *pOut = wxString{};
     }
 
     return 0;

@@ -352,7 +352,7 @@ modularity::ContextPtr GuiApp::setupNewContext(const muse::StringList& args)
     return ctx;
 }
 
-void GuiApp::destroyContext(const muse::modularity::ContextPtr& ctx)
+void GuiApp::destroyContext(const kors::modularity::ContextPtr& ctx)
 {
     auto it = std::find_if(m_contexts.begin(), m_contexts.end(), [&](const Context& c) {
         return c.ctx->id == ctx->id;

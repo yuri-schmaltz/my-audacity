@@ -12,6 +12,7 @@
 #include "au3-preferences/Prefs.h"
 #include "au3-project-file-io/ProjectFileIO.h"
 #include "au3-module-manager/ModuleManager.h"
+#include "au3-utility/ModuleConstants.h"
 
 #include "modularity/ioc.h"
 
@@ -28,6 +29,8 @@
 
 using namespace au::au3;
 using namespace muse::modularity;
+
+extern "C" int ModuleDispatch_ScriptPipe(ModuleDispatchTypes type);
 
 std::string Au3WrapModule::moduleName() const
 {
@@ -63,6 +66,9 @@ void Au3WrapModule::onInit(const muse::IApplication::RunMode&)
     ModuleManager::Get().Initialize();
     Importer::Get().Initialize();
     ExportPluginRegistry::Get().Initialize();
+
+    // Initialize mod-script-pipe
+    ModuleDispatch_ScriptPipe(ModuleInitialize);
 
     muse::String tempDir = projectConfiguration()->temporaryDir().toString();
     UpdateDefaultPath(FileNames::Operation::Temp, wxFromString(tempDir));

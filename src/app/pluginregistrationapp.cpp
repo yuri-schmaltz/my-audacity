@@ -4,6 +4,7 @@
 #include "pluginregistrationapp.h"
 
 #include <QCoreApplication>
+#include <algorithm>
 
 #include "modularity/ioc.h"
 #include "types/ret.h"
@@ -163,7 +164,7 @@ std::vector<muse::modularity::IContextSetup*>& PluginRegistrationApp::contextSet
     return ref.setups;
 }
 
-modularity::ContextPtr PluginRegistrationApp::setupNewContext()
+modularity::ContextPtr PluginRegistrationApp::setupNewContext(const muse::StringList& args)
 {
     // Single context mode: only allow one context
     static bool once = false;
@@ -178,6 +179,17 @@ modularity::ContextPtr PluginRegistrationApp::setupNewContext()
     }
 
     return nullptr;
+}
+
+void PluginRegistrationApp::destroyContext(const muse::modularity::ContextPtr& ctx)
+{
+    auto it = std::find_if(m_contexts.begin(), m_contexts.end(), [&](const Context& c) {
+        return c.ctx->id == ctx->id;
+    });
+    if (it != m_contexts.end()) {
+        qDeleteAll(it->setups);
+        m_contexts.erase(it);
+    }
 }
 
 int PluginRegistrationApp::contextCount() const

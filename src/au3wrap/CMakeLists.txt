@@ -103,6 +103,9 @@ set(MODULE_SRC ${MODULE_SRC}
     ${IMPORT_EXPORT_MODULE}/RegisterImportPlugins.cpp
     ${IMPORT_EXPORT_MODULE}/RegisterImportPlugins.h
 
+    ${AU3_MODULES}/scripting/mod-script-pipe/PipeServer.cpp
+    ${AU3_MODULES}/scripting/mod-script-pipe/ScripterCallback.cpp
+
     ${IMPORT_EXPORT_MODULE}/mod-mp3/ExportMP3.cpp
     ${IMPORT_EXPORT_MODULE}/mod-mp3/ExportMP3.h
     ${IMPORT_EXPORT_MODULE}/mod-mp3/MP3.cpp

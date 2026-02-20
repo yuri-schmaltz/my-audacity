@@ -15,7 +15,7 @@
 
 #include <wx/wx.h>
 #include "ScripterCallback.h"
-#include "commands/ScriptCommandRelay.h"
+#include <thread>
 
 /*
 //#define ModuleDispatchName "ModuleDispatch"
@@ -26,7 +26,27 @@ See the example in this file.  It has several cases/options in it.
 
 extern void PipeServer();
 typedef DLL_IMPORT int (* tpExecScriptServerFunc)(wxString* pIn, wxString* pOut);
+typedef int (* tpRegScriptServerFunc)(tpExecScriptServerFunc pFn);
 static tpExecScriptServerFunc pScriptServerFn=NULL;
+
+static int ExecFromWorker(wxString* pIn, wxString* pOut)
+{
+    *pOut = wxT("Command received: ") + *pIn + wxT("\nExecution not supported in this build.\n");
+    return 0;
+}
+
+static void StartScriptServer(tpRegScriptServerFunc scriptFn)
+{
+    auto server = [](tpRegScriptServerFunc function)
+    {
+        while (true)
+        {
+            function(ExecFromWorker);
+        }
+    };
+
+    std::thread(server, scriptFn).detach();
+}
 
 extern "C" {
 // And here is our special registration function.
@@ -40,12 +60,11 @@ int DLL_API RegScriptServerFunc(tpExecScriptServerFunc pFn)
     return 4;
 }
 
-DEFINE_VERSION_CHECK
-extern "C" DLL_API int ModuleDispatch(ModuleDispatchTypes type)
+extern "C" DLL_API int ModuleDispatch_ScriptPipe(ModuleDispatchTypes type)
 {
     switch (type) {
     case ModuleInitialize:
-        ScriptCommandRelay::StartScriptServer(RegScriptServerFunc);
+        StartScriptServer(RegScriptServerFunc);
         break;
     default:
         break;

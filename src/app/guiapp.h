@@ -30,11 +30,11 @@ public:
 
     void addModule(muse::modularity::IModuleSetup* module);
 
-    void destroyContext(const muse::modularity::ContextPtr& ctx) override;
+    void destroyContext(const kors::modularity::ContextPtr& ctx) override;
     void setup() override;
     void finish() override;
 
-    muse::modularity::ContextPtr setupNewContext(const muse::StringList& args = {}) override;
+    kors::modularity::ContextPtr setupNewContext(const muse::StringList& args = {}) override;
     int contextCount() const override;
     std::vector<muse::modularity::ContextPtr> contexts() const override;
 
